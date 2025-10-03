@@ -1,0 +1,25 @@
+import sys
+
+from PyQt5.QtWidgets import QWidget, QPushButton, QHBoxLayout, QGroupBox, QGridLayout, QLabel, QLineEdit, QVBoxLayout, QApplication
+
+
+class App(QApplication):
+    def __init__(self, sys_argv):
+        super(App, self).__init__(sys_argv)
+        self.gui = Aplicacion_Gui()
+
+
+if __name__ == '__main__':
+    app = App(sys.argv)
+    sys.exit(app.exec_())
+    
+class Aplicacion_Gui(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        #Se establecen las características de la ventana
+        self.title = 'Mi aplicación'
+        self.left = 80
+        self.top = 80
+        self.width = 300
+        self.height = 320
