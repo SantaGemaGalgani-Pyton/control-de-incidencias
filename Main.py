@@ -1,7 +1,13 @@
 import graficos
+import sys
+import RegistroUsu
+from PyQt5.QtWidgets import QApplication
 
 def Main():
-    graficos.GraficoLineal()
+    app = QApplication(sys.argv)
+    ventana = RegistroUsu.VentanaPrincipal()
+    ventana.show()
+    sys.exit(app.exec_())
 
 if __name__ == "__main__":
     Main()

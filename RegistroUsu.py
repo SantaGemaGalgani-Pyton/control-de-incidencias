@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QLineEdit, QHBoxLayout
 from PyQt5.QtCore import Qt
 
 class VentanaPrincipal(QWidget):
@@ -21,28 +21,29 @@ class VentanaPrincipal(QWidget):
         self.Rboton.setFixedHeight(35)
 
         self.Utextarea = QLineEdit()
-        self.Utextarea.setFixedWidth(250)
-        self.Utextarea.setFixedHeight(30)
 
         self.Ctextarea = QLineEdit()
         self.Ctextarea.setEchoMode(QLineEdit.Password)
-        self.Ctextarea.setFixedWidth(250)
-        self.Ctextarea.setFixedHeight(30)
-    
 
-        self.ISboton.clicked.connect(self.registrarse)
-        self.Rboton.clicked.connect(self.iniciarsesion)
+        self.ISboton.clicked.connect(self.iniciarsesion)
+        self.Rboton.clicked.connect(self.registrarse)
+
+        layout_botones = QHBoxLayout()
+        layout_botones.addStretch()
+        layout_botones.addWidget(self.ISboton)
+        layout_botones.addSpacing(20)
+        layout_botones.addWidget(self.Rboton)
+        layout_botones.addStretch()
 
         layout = QVBoxLayout()
         layout.addWidget(self.Ulabel)
         layout.addWidget(self.Utextarea)
         layout.addWidget(self.Clabel)
         layout.addWidget(self.Ctextarea)
-        layout.addWidget(self.ISboton)
-        layout.addWidget(self.Rboton)
+        layout.addLayout(layout_botones)
         layout.setContentsMargins(50, 30, 50, 30)
         layout.setSpacing(20)
-        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setAlignment(Qt.AlignCenter)
         self.setLayout(layout)
 
     def registrarse(self):
