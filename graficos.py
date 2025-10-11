@@ -31,4 +31,4 @@ def GraficoLineas(sizeX, sizeY, meses, valoresY, titulo = None, tituloX = None, 
     plt.show()
     pass
 
-GraficoLineas(10, 40, ["enero", "febrero","marzo","abril"], [1, 3, 1, 1])
+#GraficoLineas(10, 40, ["enero", "febrero","marzo","abril"], [1, 3, 1, 1])

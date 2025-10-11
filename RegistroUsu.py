@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QLineEdit, QHBoxLayout
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 class VentanaPrincipal(QWidget):
     def __init__(self):
@@ -47,10 +47,12 @@ class VentanaPrincipal(QWidget):
         self.setLayout(layout)
 
     def registrarse(self):
+        # Alvaro base de datos ususario contraseña registro
         self.Usuario = self.Utextarea.text()
         self.Contrasenia = self.Ctextarea.text()
 
     def iniciarsesion(self):
+        # Alvaro base de datos ususario contraseña comprobacion inicio sesion
         self.Usuario = self.Utextarea.text()
         self.Contrasenia = self.Ctextarea.text()
 

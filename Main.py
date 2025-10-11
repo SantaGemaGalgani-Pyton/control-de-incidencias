@@ -1,7 +1,6 @@
-import graficos
 import sys
 import RegistroUsu
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import *
 
 def Main():
     app = QApplication(sys.argv)
