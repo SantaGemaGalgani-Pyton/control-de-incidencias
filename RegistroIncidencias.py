@@ -1,8 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QPushButton, QVBoxLayout, QLineEdit, QComboBox, QCalendarWidget, QHBoxLayout
-from PyQt5.QtCore import Qt, QDate
+import VentanaPrincipal
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
-class VentanaPrincipal(QWidget):
+class RI(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -52,7 +53,7 @@ class VentanaPrincipal(QWidget):
         layout_botones.addStretch() 
 
         layout = QVBoxLayout()
-        layout.addWidget(self.Nlabel)
+        layout.addWidget(self.Nlabel) 
         layout.addWidget(self.Ntextarea)
         layout.addWidget(self.Plabel)
         layout.addWidget(self.Ptextarea)
@@ -87,11 +88,12 @@ class VentanaPrincipal(QWidget):
         self.Fcalendar.hide()
     
     def volver(self):
-
-        ventana.close()
+        self.Pventana = VentanaPrincipal.VentanaPrincipal()
+        self.Pventana.show()
+        self.close()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ventana = VentanaPrincipal()
+    ventana = RI()
     ventana.show()
     sys.exit(app.exec_())

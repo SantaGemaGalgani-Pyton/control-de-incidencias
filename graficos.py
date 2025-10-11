@@ -15,7 +15,4 @@ def GraficoTipoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]], 
     plt.show()
     pass
 
-GraficoTipoDeIncidencias(7, "Grafico de incidencias por tipo")
-
-# plt.savefig('foo.png')
-# plt.savefig('foo.pdf')
+#GraficoLineas(10, 40, ["enero", "febrero","marzo","abril"], [1, 3, 1, 1])
