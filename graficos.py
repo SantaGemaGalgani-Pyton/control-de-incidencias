@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-def GraficoTipoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]], titulo):
+def GraficoTipoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]], titulo:str):
     """ valoresX y valoresY son Arrays de numpy
     """
 
@@ -8,10 +8,10 @@ def GraficoTipoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]], 
     sizes = [33, 12, 4]
     colors = ["#75DAFF", "#FFFF88", "#FF8A96"]
     # Pastel azul, amarillo y rojo
-
+    
     fig, ax = plt.subplots()
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors)
-    ax.title(titulo)
+    ax.set_title(titulo)
     ax.axis("equal")
     return ax
 
