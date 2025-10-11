@@ -9,10 +9,10 @@ def GraficoTipoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]], 
     colors = ["#75DAFF", "#FFFF88", "#FF8A96"]
     # Pastel azul, amarillo y rojo
 
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors)
-    plt.title(titulo)
-    plt.axis("equal")
-    plt.show()
-    pass
+    fig, ax = plt.subplots()
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors)
+    ax.title(titulo)
+    ax.axis("equal")
+    return ax
 
 #GraficoLineas(10, 40, ["enero", "febrero","marzo","abril"], [1, 3, 1, 1])
