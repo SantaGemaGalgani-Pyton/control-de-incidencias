@@ -3,8 +3,10 @@ import RegistroIncidencias, BorrarI, graficos
 from PyQt5.QtWidgets import *
 
 class VentanaPrincipal(QMainWindow):
-    def __init__(self):
+    def __init__(self, bd):
         super().__init__()
+
+        self.bd = bd
 
         self.setWindowTitle("Incidencias")
         self.setGeometry(100, 100, 700, 400)
@@ -43,20 +45,18 @@ class VentanaPrincipal(QMainWindow):
         central_widget = QWidget()
         layout = QVBoxLayout()
 
+        # Alvaro datos bbdd 
+        datos = bd.consultar_todas()
+
         self.tabla = QTableWidget()
-        self.tabla.setRowCount(1)
-        self.tabla.setColumnCount(6)
-        self.tabla.setHorizontalHeaderLabels(["ID", "Titulo", "Descripción", "Nivel", "Fecha", "Estado"])
+        self.tabla.setRowCount(len(datos))
+        self.tabla.setColumnCount(len(datos[0]))
+        self.tabla.setHorizontalHeaderLabels(["Titulo", "Descripción", "Nivel", "Fecha y Hora", "Estado"])
         self.tabla.setFixedHeight(300)
 
-        # Alvaro datos bbdd 
-        datos = [
-            ["1", "t", "d", "n", "f", "e"]
-        ]
-
-        for fila in range(1):
-            for col in range(6):
-                self.tabla.setItem(fila, col, QTableWidgetItem(datos[fila][col]))
+        for fila, datos in enumerate(datos):
+            for col, valor in enumerate(datos):
+                self.tabla.setItem(fila, col, QTableWidgetItem(valor))
 
         layout.addWidget(self.tabla)
         central_widget.setLayout(layout)
