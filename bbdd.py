@@ -21,30 +21,46 @@ class BaseDeDatos():
             
             estados = ["Pendiente", "En Proceso", "Resuelto"]
             for estado in estados:
-                cursor.execute("INSERT OR IGNORE INTO Estado (Nombre) VALUES (?)", (estado,))
+                cursor.execute("INSERT INTO Estado (Nombre) VALUES (?)", (estado,))
+            conn.commit()
             print("Estados insertados")
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Usuarios'")
+        foundUsuarios = cursor.fetchone()
+        if (not foundUsuarios):
+            cursor.execute("""
+            CREATE TABLE Usuarios (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Nombre TEXT,
+                Pass TEXT )""")
+            conn.commit()
+            cursor.execute("INSERT INTO Usuarios (Nombre, Pass) Values (?, ?)", ("Admin", "Admin123"))
+            conn.commit()
+            print("Admin insertado")
 
 
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Niveles'")
-        foundEstado = cursor.fetchone()
-        if (not foundEstado):
+        foundNiveles = cursor.fetchone()
+        if (not foundNiveles):
             cursor.execute("""
             CREATE TABLE Niveles (
                 Numero INTEGER PRIMARY KEY,
-                Descripcion_Detallada TEXT NOT NULL UNIQUE )""")
+                Descripcion_Detallada TEXT NOT NULL UNIQUE ,
+                Color TEXT )""")
             conn.commit()
             
-            niveles = ["Bajo", "Medio", "Alto"]
+            niveles = [("Bajo", "#75DAFF"), ("Medio", "#FFFF88"), ("Alto", "#FF8A96")]
             for nivel in niveles:
-                cursor.execute("INSERT OR IGNORE INTO Niveles (Descripcion_Detallada) VALUES (?)", (nivel,))
+                cursor.execute("INSERT INTO Niveles (Descripcion_Detallada, Color) VALUES (?, ?)", (nivel[0], nivel[1]))
+            conn.commit()
+            print("Niveles insertados")
 
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Incidencia'")
-        foundEstado = cursor.fetchone()
-        if (not foundEstado):
+        foundIncidencias = cursor.fetchone()
+        if (not foundIncidencias):
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS Incidencia (
+            CREATE TABLE Incidencia (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            Titulo TEXT NOT NULL,
             Descripcion_Detallada TEXT,
             Nivel INTEGER,
             Fecha_y_Hora TEXT NOT NULL,
@@ -53,22 +69,22 @@ class BaseDeDatos():
             FOREIGN KEY (Estado) REFERENCES Estado(Numero) )""")
             conn.commit()
 
-            self.crear_incidencia("Titulo 1", "Descripcion detallada 1", 1, "2025-10-01 09:15:00", 1)
-            self.crear_incidencia("Titulo 2", "Descripcion detallada 2", 2, "2025-10-03 11:30:00", 2)
-            self.crear_incidencia("Titulo 3", "Descripcion detallada 3", 3, "2025-10-05 14:45:00", 3)
-            self.crear_incidencia("Titulo 4", "Descripcion detallada 4", 1, "2025-10-07 08:20:00", 2)
-            self.crear_incidencia("Titulo 5", "Descripcion detallada 5", 2, "2025-10-10 16:10:00", 1)
+            self.crear_incidencia("Descripcion detallada 1", 1, date.today(), 2)
+            self.crear_incidencia("Descripcion detallada 2", 2, date.today(), 3)
+            self.crear_incidencia("Descripcion detallada 3", 3, date.today(), 3)
+            self.crear_incidencia("Descripcion detallada 4", 1, date.today(), 3)
+            self.crear_incidencia("Descripcion detallada 5", 2, date.today(), 1)
+
+            print("Base de datos creada con éxito")
 
         conn.close()
-
-        print("Base de datos creada con éxito.")
         pass
 
     def consultar_todas(self):
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
-        SELECT i.Titulo, i.Descripcion_Detallada, n.Descripcion_Detallada, i.Fecha_y_Hora, e.Nombre
+        SELECT i.Descripcion_Detallada, n.Descripcion_Detallada, i.Fecha_y_Hora, e.Nombre
         FROM Incidencia i
         LEFT JOIN Niveles n ON i.Nivel = n.Numero
         LEFT JOIN Estado e ON i.Estado = e.Numero
@@ -81,7 +97,7 @@ class BaseDeDatos():
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
-        SELECT i.ID, i.Titulo, i.Descripcion_Detallada, n.Descripcion_Detallada, i.Fecha_y_Hora, e.Nombre
+        SELECT i.Descripcion_Detallada, n.Descripcion_Detallada, i.Fecha_y_Hora, e.Nombre
         FROM Incidencia i
         LEFT JOIN Niveles n ON i.Nivel = n.Numero
         LEFT JOIN Estado e ON i.Estado = e.Numero
@@ -95,7 +111,7 @@ class BaseDeDatos():
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
-        SELECT i.ID, i.Titulo, i.Descripcion_Detallada, n.Descripcion_Detallada, i.Fecha_y_Hora, e.Nombre
+        SELECT i.Descripcion_Detallada, n.Descripcion_Detallada, i.Fecha_y_Hora, e.Nombre
         FROM Incidencia i
         LEFT JOIN Niveles n ON i.Nivel = n.Numero
         LEFT JOIN Estado e ON i.Estado = e.Numero
@@ -137,15 +153,77 @@ class BaseDeDatos():
         conn.close()
         print(f"Incidencia {id_incidencia} eliminada")
 
-    def crear_incidencia(self, titulo, descripcion_detallada, nivel, fecha_y_hora, estado):
+    def crear_incidencia(self, descripcion_detallada, nivel, fecha):
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO Incidencia (Titulo, Descripcion_Detallada, Nivel, Fecha_y_Hora, Estado)
-            VALUES (?, ?, ?, ?, ?)""",                       
-            (titulo, descripcion_detallada, nivel, fecha_y_hora, estado))
+            INSERT INTO Incidencia (Descripcion_Detallada, Nivel, Fecha_y_Hora, Estado)
+            VALUES (?, ?, ?, ?)""",                       
+            (descripcion_detallada, nivel, fecha, 1))
         conn.commit()
         conn.close()
+
+    def crear_incidencia(self, descripcion_detallada, nivel, fecha, estado):
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO Incidencia (Descripcion_Detallada, Nivel, Fecha_y_Hora, Estado)
+            VALUES (?, ?, ?, ?)""",                       
+            (descripcion_detallada, nivel, fecha, estado))
+        conn.commit()
+        conn.close()
+
+    def nombres_niveles(self):
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT Descripcion_Detallada from Niveles")
+        filas = cursor.fetchall()
+        conn.close()
+        return filas
+
+    def incidencias_gravedad(self):
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        dias = self.diasDelMesHastaHoy()
+        diasQ = ",".join("?" * len(dias))
+        cursor.execute(f"""
+        SELECT n.Descripcion_Detallada, COUNT(*) AS total, n.Color
+        FROM INCIDENCIA i
+        LEFT JOIN Niveles n ON i.Nivel = n.Numero
+        WHERE i.Fecha_Y_Hora IN({diasQ})
+        GROUP BY i.Nivel
+        """, self.diasDelMesHastaHoy())
+        filas = cursor.fetchall()
+        print(filas)
+        conn.close()
+        return filas
+
+    def incidencias_estado(self):
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        dias = self.diasDelMesHastaHoy()
+        diasQ = ",".join("?" * len(dias))
+        cursor.execute(f"""
+        SELECT e.Nombre, COUNT(*) AS total
+        FROM INCIDENCIA i
+        LEFT JOIN Estado e ON i.Estado = e.Numero
+        WHERE i.Fecha_Y_HORA IN({diasQ})
+        GROUP BY i.Estado
+        """, self.diasDelMesHastaHoy())
+        filas = cursor.fetchall()
+        print(filas)
+        conn.close()
+        return filas
+
+    def usuario_password_existen(self, usuario :str, password :str):
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Usuarios WHERE Nombre=? AND Pass=?", (usuario, password))
+        foundNiveles = cursor.fetchone()
+        if (foundNiveles):
+            return True
+        else:
+            return False
 
     def diasDelMesHastaHoy(self):
         hoy = date.today()
@@ -155,5 +233,4 @@ class BaseDeDatos():
             dias.append(cur.strftime('%Y-%m-%d'))
             cur += timedelta(days=1)
 
-        print(dias)
         return dias

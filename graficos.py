@@ -54,18 +54,3 @@ def ExportarACSV(encabezado, contenido):
     writer.writerow(encabezado)
     writer.writerows(contenido)
     f.close()
-
-tipoIncidenciaYCuenta = [
-    ("Resuelto", 33),
-    ("En proceso", 12),
-    ("Sin resolver", 4)
-]
-
-#GraficoEstadoDeIncidencias(tipoIncidenciaYCuenta)
-tipoIncidenciaYCuenta2 = [
-    ("Bajo", 12, "#FF0000"),
-    ("Medio", 15, "#00FF00"),
-    ("Alto", 40, "#0000FF")
-]
-
-GraficoNivelDeIncidencias(tipoIncidenciaYCuenta2)

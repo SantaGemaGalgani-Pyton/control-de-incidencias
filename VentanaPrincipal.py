@@ -1,9 +1,10 @@
 import sys
+from bbdd import BaseDeDatos
 import RegistroIncidencias, BorrarI, graficos
 from PyQt5.QtWidgets import *
 
 class VentanaPrincipal(QMainWindow):
-    def __init__(self, bd):
+    def __init__(self, bd: BaseDeDatos):
         super().__init__()
 
         self.bd = bd
@@ -51,7 +52,7 @@ class VentanaPrincipal(QMainWindow):
         self.tabla = QTableWidget()
         self.tabla.setRowCount(len(datos))
         self.tabla.setColumnCount(len(datos[0]))
-        self.tabla.setHorizontalHeaderLabels(["Titulo", "Descripción", "Nivel", "Fecha y Hora", "Estado"])
+        self.tabla.setHorizontalHeaderLabels(["Descripción", "Nivel", "Fecha y Hora", "Estado"])
         self.tabla.setFixedHeight(300)
 
         for fila, datos in enumerate(datos):
@@ -64,24 +65,20 @@ class VentanaPrincipal(QMainWindow):
         self.setCentralWidget(central_widget)
 
     def abrirRI(self):
-        self.registro = RegistroIncidencias.RI()
+        self.registro = RegistroIncidencias.RI(self.bd)
         self.registro.show()
         self.close()
     
     def abrirBI(self):
-        self.registro = BorrarI.BorrarI()
+        self.registro = BorrarI.BorrarI(self.bd)
         self.registro.show()
         self.close()
     
     def abrirGG(self):
-        self.registro = graficos.GraficoLineas()
-        self.registro.show()
-        self.close()
+        self.registro = graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad())
 
     def abrirGE(self):
-        #self.registro = graficos.()
-        self.registro.show()
-        self.close()
+        self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
 
     def abrirGTR(self):
         #self.registro = graficos.()
