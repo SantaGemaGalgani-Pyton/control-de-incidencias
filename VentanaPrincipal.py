@@ -49,14 +49,13 @@ class VentanaPrincipal(QMainWindow):
         central_widget = QWidget()
         layout = QVBoxLayout()
 
-        # Alvaro datos bbdd 
         datos = bd.consultar_todas()
         
         """Se crea la tabla y se añade a la ventana"""
         self.tabla = QTableWidget()
         self.tabla.setRowCount(len(datos))
         self.tabla.setColumnCount(len(datos[0]))
-        self.tabla.setHorizontalHeaderLabels(["Descripción", "Nivel", "Fecha y Hora", "Estado"])
+        self.tabla.setHorizontalHeaderLabels(["Descripción", "Nivel", "Fecha creación", "Fecha resolución", "Estado"])
         self.tabla.setFixedHeight(300)
 
         for fila, datos in enumerate(datos):

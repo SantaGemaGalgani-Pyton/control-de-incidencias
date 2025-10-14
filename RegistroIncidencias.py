@@ -38,7 +38,7 @@ class RI(QWidget):
         self.Ptextarea.addItems(opciones)
 
         self.fecha = QLineEdit()
-        self.fecha.setText(QDate.currentDate().toString("dd/MM/yyyy"))
+        self.fecha.setText(QDate.currentDate().toString("dd-MM-yyyy"))
         self.fecha.setReadOnly(True)
         self.fecha.mousePressEvent = self.mostrarCalendario
 
