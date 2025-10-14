@@ -55,7 +55,7 @@ class BorrarI(QWidget):
         print("ALVARO BORRA BBDD")
 
     def volver(self):
-        self.Pventana = VentanaPrincipal.VentanaPrincipal()
+        self.Pventana = VentanaPrincipal.VentanaPrincipal(self.bd)
         self.Pventana.show()
         self.close()
 

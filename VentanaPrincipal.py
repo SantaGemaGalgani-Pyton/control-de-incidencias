@@ -4,14 +4,17 @@ import RegistroIncidencias, BorrarI, graficos
 from PyQt5.QtWidgets import *
 
 class VentanaPrincipal(QMainWindow):
+    """Se crea la ventana principal"""
     def __init__(self, bd: BaseDeDatos):
         super().__init__()
 
         self.bd = bd
-
+        
+        """Titulo"""
         self.setWindowTitle("Incidencias")
         self.setGeometry(100, 100, 700, 400)
 
+        """Se crea el menu con sus distintos botones"""
         menubar = self.menuBar()
         incidencias_menu = menubar.addMenu("Incidencias")
 
@@ -48,7 +51,8 @@ class VentanaPrincipal(QMainWindow):
 
         # Alvaro datos bbdd 
         datos = bd.consultar_todas()
-
+        
+        """Se crea la tabla y se añade a la ventana"""
         self.tabla = QTableWidget()
         self.tabla.setRowCount(len(datos))
         self.tabla.setColumnCount(len(datos[0]))
@@ -68,22 +72,27 @@ class VentanaPrincipal(QMainWindow):
         self.registro = RegistroIncidencias.RI(self.bd)
         self.registro.show()
         self.close()
-    
+    """Abre el Registro de incidencias"""
+
     def abrirBI(self):
         self.registro = BorrarI.BorrarI(self.bd)
         self.registro.show()
         self.close()
-    
+    """Abre el Borrar incidencias"""
+
     def abrirGG(self):
         self.registro = graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad())
+    """Abre el Gráfico de gravedad"""
 
     def abrirGE(self):
         self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
+    """Abre el grafico de estado"""
 
     def abrirGTR(self):
         #self.registro = graficos.()
         self.registro.show()
         self.close()
+    """Abre el grafico de tiempo de registro"""
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -10,13 +10,16 @@ class RI(QWidget):
 
         self.bd = bd
 
+        """Titulo"""
         self.setWindowTitle("Registro de Incidencias")
         self.setGeometry(100, 100, 500, 350)
 
+        """Creamos los textos"""
         self.Nlabel = QLabel("Nombre Incidencia")
         self.Plabel = QLabel("Prioridad")
         self.Flabel = QLabel("Fecha")
 
+        """Creamos los botones para guardar o borrar incidencias"""
         self.Gboton = QPushButton("Guardar Incidencia")
         self.Gboton.setFixedWidth(150)
         self.Gboton.setFixedHeight(35)
@@ -25,8 +28,8 @@ class RI(QWidget):
         self.Bboton.setFixedWidth(150)
         self.Bboton.setFixedHeight(35)
 
+        """Creamos las cajas de texto para recoger los datos de la incidencia"""
         self.Ntextarea = QLineEdit()
-
         self.Ptextarea = QComboBox()
         op = []
         for fila in self.bd.nombres_niveles():
@@ -43,6 +46,7 @@ class RI(QWidget):
         self.Fcalendar.setWindowFlags(self.Fcalendar.windowFlags() | Qt.Popup)
         self.Fcalendar.clicked.connect(self.seleccionarFecha)
 
+        """Indicamos que hace cada boton"""
         self.Gboton.clicked.connect(self.guardar)
         self.Bboton.clicked.connect(self.borrar)
 
@@ -51,6 +55,7 @@ class RI(QWidget):
         self.atrasBoton.setFixedHeight(35)
         self.atrasBoton.clicked.connect(self.volver)
 
+        """Hacemos los layouts para ordenar los diferentes elementos"""
         layout_botones = QHBoxLayout()
         layout_botones.addStretch()
         layout_botones.addWidget(self.Gboton)
@@ -80,24 +85,29 @@ class RI(QWidget):
         self.Prioridad = self.Ptextarea.currentIndex() + 1
         self.Fecha = self.fecha.text()
         self.bd.crear_incidencia(self.Nombre, self.Prioridad, self.Fecha)
+        """Guarda los elementos en la base de datos"""
 
     def borrar(self):
         self.Ntextarea.clear()
         self.Ptextarea.setCurrentIndex(0)
         self.fecha.setText(QDate.currentDate().toString("dd/MM/yyyy"))
+        """Borra todo lo cambiado dentro de la ventana"""
 
     def mostrarCalendario(self, event):
         self.Fcalendar.move(self.fecha.mapToGlobal(self.fecha.rect().bottomLeft()))
         self.Fcalendar.show()
+        """Muestra el calendario"""
 
     def seleccionarFecha(self, date):
         self.fecha.setText(date.toString("dd/MM/yyyy"))
         self.Fcalendar.hide()
+        """Selecciona la fecha del calendario"""
     
     def volver(self):
         self.Pventana = VentanaPrincipal.VentanaPrincipal(self.bd)
         self.Pventana.show()
         self.close()
+        """Vuelve a la ventana principal"""
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
