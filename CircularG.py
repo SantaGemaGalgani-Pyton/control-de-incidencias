@@ -24,7 +24,7 @@ class CircularG(QWidget):
             ("Alto", 4, "#FF8A96")
         ]
 
-        ax = graficos.GraficoTipoDeIncidencias(tipoIncidenciaYCuenta, "titulo")
+        ax = graficos.GraficoNivelDeIncidencias(tipoIncidenciaYCuenta, "titulo")
         self.canvas.draw() 
 
 if __name__ == "__main__":

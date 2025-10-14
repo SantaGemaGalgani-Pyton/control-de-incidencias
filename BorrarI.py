@@ -3,8 +3,11 @@ import VentanaPrincipal
 from PyQt5.QtWidgets import *
 
 class BorrarI(QWidget):
-    def __init__(self):
+    def __init__(self, bd):
         super().__init__()
+
+        self.bd = bd
+
         self.setWindowTitle("Borrar Incidencia")
         self.setGeometry(100, 100, 640, 500)
 

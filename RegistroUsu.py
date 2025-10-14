@@ -1,10 +1,14 @@
 import sys
+from bbdd import BaseDeDatos
+from VentanaPrincipal import VentanaPrincipal as mainWindow
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 class VentanaPrincipal(QWidget):
-    def __init__(self):
+    def __init__(self, bd: BaseDeDatos):
         super().__init__()
+
+        self.bd = bd
 
         self.setWindowTitle("Registro")
         self.setGeometry(100, 100, 500, 350)
@@ -55,9 +59,9 @@ class VentanaPrincipal(QWidget):
         # Alvaro base de datos ususario contraseña comprobacion inicio sesion
         self.Usuario = self.Utextarea.text()
         self.Contrasenia = self.Ctextarea.text()
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ventana = VentanaPrincipal()
-    ventana.show()
-    sys.exit(app.exec_())
+        if (self.bd.usuario_password_existen(self.Usuario, self.Contrasenia)):
+            self.Pventana = mainWindow(self.bd)
+            self.Pventana.show()
+            self.close()
+        else:
+            pass

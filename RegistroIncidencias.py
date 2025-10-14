@@ -1,11 +1,14 @@
 import sys
 import VentanaPrincipal
+from bbdd import BaseDeDatos
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 class RI(QWidget):
-    def __init__(self):
+    def __init__(self, bd: BaseDeDatos):
         super().__init__()
+
+        self.bd = bd
 
         self.setWindowTitle("Registro de Incidencias")
         self.setGeometry(100, 100, 500, 350)
@@ -25,7 +28,10 @@ class RI(QWidget):
         self.Ntextarea = QLineEdit()
 
         self.Ptextarea = QComboBox()
-        opciones = ["Opción 1", "Opción 2", "Opción 3"]
+        op = []
+        for fila in self.bd.nombres_niveles():
+            op.append(fila[0])
+        opciones = op
         self.Ptextarea.addItems(opciones)
 
         self.fecha = QLineEdit()
@@ -71,8 +77,9 @@ class RI(QWidget):
 
     def guardar(self):
         self.Nombre = self.Ntextarea.text()
-        self.Prioridad = self.Ptextarea.currentText()
+        self.Prioridad = self.Ptextarea.currentIndex() + 1
         self.Fecha = self.fecha.text()
+        self.bd.crear_incidencia(self.Nombre, self.Prioridad, self.Fecha)
 
     def borrar(self):
         self.Ntextarea.clear()
@@ -88,7 +95,7 @@ class RI(QWidget):
         self.Fcalendar.hide()
     
     def volver(self):
-        self.Pventana = VentanaPrincipal.VentanaPrincipal()
+        self.Pventana = VentanaPrincipal.VentanaPrincipal(self.bd)
         self.Pventana.show()
         self.close()
 

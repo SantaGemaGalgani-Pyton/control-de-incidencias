@@ -1,10 +1,12 @@
 import sys
-import RegistroUsu
+from RegistroUsu import VentanaPrincipal
+import bbdd;
 from PyQt5.QtWidgets import *
 
 def Main():
     app = QApplication(sys.argv)
-    ventana = RegistroUsu.VentanaPrincipal()
+    bd = bbdd.BaseDeDatos()
+    ventana = VentanaPrincipal(bd)
     ventana.show()
     sys.exit(app.exec_())
 
