@@ -56,7 +56,6 @@ class VentanaPrincipal(QWidget):
         self.Contrasenia = self.Ctextarea.text()
 
     def iniciarsesion(self):
-        # Alvaro base de datos ususario contraseña comprobacion inicio sesion
         self.Usuario = self.Utextarea.text()
         self.Contrasenia = self.Ctextarea.text()
         if (self.bd.usuario_password_existen(self.Usuario, self.Contrasenia)):
