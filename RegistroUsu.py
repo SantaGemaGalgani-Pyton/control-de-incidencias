@@ -55,9 +55,12 @@ class VentanaPrincipal(QWidget):
         self.setLayout(layout)
 
     def registrarse(self):
-        # Alvaro base de datos ususario contraseña registro
         self.Usuario = self.Utextarea.text()
         self.Contrasenia = self.Ctextarea.text()
+        if (self.bd.usuario_password_existen(self.Usuario, self.Contrasenia)):
+            pass
+        else:
+            self.bd.anadir_usuario(self.Usuario, self.Contrasenia)
         """Registra el usuario en la base de datos"""
 
     def iniciarsesion(self):
