@@ -61,11 +61,31 @@ class VentanaPrincipal(QMainWindow):
         for fila, datos in enumerate(datos):
             for col, valor in enumerate(datos):
                 self.tabla.setItem(fila, col, QTableWidgetItem(valor))
+        
+        self.BotonCE = QPushButton("Cambiar Estado")
+        self.BotonCE.setFixedWidth(100)
+        self.BotonCE.setFixedHeight(35)
+        self.BotonCE.clicked.connect(self.cambiarEstado)
 
         layout.addWidget(self.tabla)
+        layout.addWidget(self.BotonCE)
         central_widget.setLayout(layout)
 
         self.setCentralWidget(central_widget)
+
+    def cambiarEstado(self):
+        fila = self.tabla.currentRow()
+        self.bd.actualizar_estado(self.tabla.item(fila, 0).text())
+        self.poner_datos_en_tabla()
+
+    def poner_datos_en_tabla(self):
+        datos = self.bd.consultar_todas_id()
+        self.tabla.setRowCount(len(datos))
+        self.tabla.setColumnCount(len(datos[0]))
+        
+        for fila, datos in enumerate(datos):
+            for col, valor in enumerate(datos):
+                self.tabla.setItem(fila, col, QTableWidgetItem(str(valor)))
 
     def abrirRI(self):
         self.registro = RegistroIncidencias.RI(self.bd)
@@ -93,8 +113,3 @@ class VentanaPrincipal(QMainWindow):
         self.close()
     """Abre el grafico de tiempo de registro"""
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ventana = VentanaPrincipal()
-    ventana.show()
-    sys.exit(app.exec_())
