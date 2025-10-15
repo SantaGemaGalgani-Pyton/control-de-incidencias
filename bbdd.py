@@ -8,6 +8,9 @@ class BaseDeDatos():
 
 
     def crear_bbdd(self):
+        """
+        Va creando una a una todas las tablas de la base de datos, metiéndole valores por defecto
+        """
         conn = sqlite3.connect('incidencias.db')
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Estado'")
@@ -81,7 +84,29 @@ class BaseDeDatos():
         conn.close()
         pass
 
+    def todos_los_estados(self):
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM Estado")
+        filas = cursor.fetchall()
+        conn.close()
+        return filas
+
+
+    def anadir_usuario(self, nombre: str, passw: str):
+        """
+        Añade usuarios a la base de datos
+        """
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Usuarios VALUES (?, ?)", nombre, passw)
+        conn.close()
+
     def consultar_todas(self):
+        """
+        Consulta todas las incidencias de la base de datos.
+        \nDevuelve su descripción, la fecha de creación y de resolución, y los nombres de estados y niveles
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
@@ -95,6 +120,10 @@ class BaseDeDatos():
         return filas
     
     def consultar_todas_id(self):
+        """
+        Consulta todas las incidencias de la base de datos.
+        \nDevuelve su id, su descripción, la fecha de creación y de resolución, y los nombres de estados y niveles
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
@@ -107,7 +136,10 @@ class BaseDeDatos():
         conn.close()
         return filas
 
-    def consultar_por_estado(self, estado_nombre):
+    def consultar_por_estado(self, estado_nombre: str):
+        """
+        Devuelve todas las incidencias que tengan el estado indicado
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
@@ -121,7 +153,10 @@ class BaseDeDatos():
         conn.close()
         return filas
 
-    def consultar_por_nivel(self, nivel_descripcion):
+    def consultar_por_nivel(self, nivel_descripcion: str):
+        """
+        Devuelve todas las incidencias que tengan el nivel de gravedad indicado
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
@@ -135,13 +170,19 @@ class BaseDeDatos():
         conn.close()
         return filas
     
-    def borrar_incidencia(self, id):
+    def borrar_incidencia(self, id: int):
+        """
+        Borra la incidencia con el ID especificado
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("DELETE FROM Incidencias WHERE ID = ?", id)
         conn.close()
 
-    def actualizar_estado(self, id_incidencia, nuevo_estado_num):
+    def actualizar_estado(self, id_incidencia: int, nuevo_estado_num: int):
+        """
+        Actualiza el estado de la incidencia con el ID especificado al estado especificado
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
 
@@ -165,7 +206,10 @@ class BaseDeDatos():
         conn.close()
         print(f"Incidencia {id_incidencia} actualizada al estado {nuevo_estado_num}")
 
-    def borrar_incidencia(self, id_incidencia):
+    def borrar_incidencia(self, id_incidencia: int):
+        """
+        Borra la incidencia con el ID especificado
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("DELETE FROM Incidencia WHERE ID = ?", (id_incidencia,))
@@ -174,6 +218,9 @@ class BaseDeDatos():
         print(f"Incidencia {id_incidencia} eliminada")
 
     def crear_incidencia(self, descripcion_detallada, nivel, fecha, estado=1):
+        """
+        Crea una nueva incidencia con la información especificada. El estado 1 es 'Pendiente'
+        """
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
         cursor.execute("""
