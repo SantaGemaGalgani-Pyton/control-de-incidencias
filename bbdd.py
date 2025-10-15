@@ -81,6 +81,12 @@ class BaseDeDatos():
         conn.close()
         pass
 
+    def anadir_usuario(self, nombre, passw):
+        conn = sqlite3.connect("incidencias.db")
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO Usuarios VALUES (?, ?)", nombre, passw)
+        conn.close()
+
     def consultar_todas(self):
         conn = sqlite3.connect("incidencias.db")
         cursor = conn.cursor()
