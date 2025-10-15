@@ -56,11 +56,13 @@ class VentanaPrincipal(QWidget):
         self.Contrasenia = self.Ctextarea.text()
 
     def iniciarsesion(self):
-        self.Usuario = self.Utextarea.text()
-        self.Contrasenia = self.Ctextarea.text()
+        self.Usuario = self.Utextarea.text().strip()
+        self.Contrasenia = self.Ctextarea.text().strip()
+
         if (self.bd.usuario_password_existen(self.Usuario, self.Contrasenia)):
+            QMessageBox.information(self, "Inicio de sesión", f"Bienvenido, {self.Usuario}")
             self.Pventana = mainWindow(self.bd)
             self.Pventana.show()
             self.close()
         else:
-            pass
+            QMessageBox.warning(self, "Error", "Usuario o contraseña incorrectos.")

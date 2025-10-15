@@ -76,10 +76,22 @@ class RI(QWidget):
         layout.addWidget(self.atrasBoton, alignment=Qt.AlignCenter)
 
     def guardar(self):
-        self.Nombre = self.Ntextarea.text()
+        self.Nombre = self.Ntextarea.text().strip()
         self.Prioridad = self.Ptextarea.currentIndex() + 1
         self.Fecha = self.fecha.text()
+
+        if not self.Nombre:
+            QMessageBox.warning(self, "Error", "El nombre de la incidencia no puede estar vacío.")
+            return
+
         self.bd.crear_incidencia(self.Nombre, self.Prioridad, self.Fecha)
+
+        QMessageBox.information(self, "Incidencia creada", "La incidencia ha sido guardada correctamente.")
+
+        self.Ntextarea.clear()
+        self.Ptextarea.setCurrentIndex(0)
+        self.fecha.setText(QDate.currentDate().toString("dd-MM-yyyy"))
+
 
     def borrar(self):
         self.Ntextarea.clear()

@@ -18,6 +18,9 @@ class BorrarI(QWidget):
         self.tabla.setFixedWidth(615)
         self.tabla.setFixedHeight(300)
 
+        datos = bd.consultar_todas()
+        self.tabla.setRowCount(len(datos))
+        self.tabla.setColumnCount(len(datos[0]))
         self.tabla.setHorizontalHeaderLabels(["ID", "Descripción", "Nivel", "Fecha creación", "fecha resolución", "Estado"])
 
         self.poner_datos_en_tabla()
@@ -44,11 +47,20 @@ class BorrarI(QWidget):
 
         self.setLayout(layout)
 
-    # Consulta BBDD borrar
     def borrar(self):
         fila = self.tabla.currentRow()
-        self.bd.borrar_incidencia(self.tabla.item(fila, 0).text())
+        if fila == -1:
+            QMessageBox.warning(self, "Error", "Por favor, selecciona una incidencia para borrar.")
+            return
+
+        id_incidencia = self.tabla.item(fila, 0).text()
+
+        self.bd.borrar_incidencia(id_incidencia)
+
         self.poner_datos_en_tabla()
+
+        QMessageBox.information(self, "Borrado", f"La incidencia con ID {id_incidencia} ha sido borrada correctamente.")
+
 
     def volver(self):
         self.Pventana = VentanaPrincipal.VentanaPrincipal(self.bd)
@@ -70,4 +82,3 @@ if __name__ == "__main__":
     ventana = BorrarI()
     ventana.show()
     sys.exit(app.exec_())
-
