@@ -20,3 +20,4 @@ Este proyecto permite:
 * Pathlib
 * Joblib
 * Flask
+* sklearn (Sickit learn)
