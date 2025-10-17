@@ -119,10 +119,10 @@ class VentanaPrincipal(QMainWindow):
 
     def cambiarEstado(self):
         fila = self.tabla.currentRow()
-        self.a = self.tabla.item(fila, 3).text
-        print(self.a)
-        """self.bd.actualizar_estado(self.tabla.item(fila, 0).text(), )"""
-        self.poner_datos_en_tabla()
+
+        if fila == -1:
+            QMessageBox.warning(self, "Error", "Selecciona una fila primero.")
+            return
 
     def poner_datos_en_tabla(self):
         datos = self.bd.consultar_todas_id()
