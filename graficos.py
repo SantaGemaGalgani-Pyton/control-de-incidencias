@@ -3,7 +3,7 @@ import csv
 from matplotlib.figure import Figure
 import os;
 
-def GraficoNivelDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]]):
+def GraficoNivelDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]], mostrar:bool):
     """Devuelve un gráfico circular con las incidencias categorizadas por su tipo
     \ntipoIncidenciaYCuenta es una lista de 'tipo','numero','color'
     """
@@ -13,15 +13,15 @@ def GraficoNivelDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int, str]])
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors)
     ax.set_title("Incidencias de este último mes por gravedad")
     ax.axis("equal")
-    plt.show()
+    if mostrar:
+        plt.show()
 
     ExportarAPDF(fig)
     ExportarACSV(["Tipo","Numero","Color"], tipoIncidenciaYCuenta)
 
-    return ax
+    return fig
 
-
-def GraficoEstadoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int]]):
+def GraficoEstadoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int]], mostrar: bool):
     """Devuelve un gráfico de barras con las incidencias categorizadas por su nivel
     \ntipoIncidenciaYCuenta es una lista de 'estado','numero'
     """
@@ -33,8 +33,9 @@ def GraficoEstadoDeIncidencias(tipoIncidenciaYCuenta: list[tuple[str, int]]):
     ax.set_xticks(x_pos)
     ax.set_xticklabels(labels)
     ax.set_title("Incidencias de este último mes por estado")
-    plt.show()
-    return ax
+    if mostrar:
+        plt.show()
+    return fig
 
 def ExportarAPDF(figura: Figure):
     """Exporta la figura del gráfico a pdf, automáticamente a la carpeta descargas, bajo el nombre 'grafico.pdf'
