@@ -146,11 +146,11 @@ class VentanaPrincipal(QMainWindow):
     """Abre el Borrar incidencias"""
 
     def abrirGG(self):
-        self.registro = graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad())
+        self.registro = graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad(), True)
     """Abre el Gráfico de gravedad"""
 
     def abrirGE(self):
-        self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
+        self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado(), True)
     """Abre el grafico de estado"""
 
     def abrirGTR(self):
