@@ -58,9 +58,11 @@ class VentanaPrincipal(QWidget):
         self.Usuario = self.Utextarea.text()
         self.Contrasenia = self.Ctextarea.text()
         if (self.bd.usuario_password_existen(self.Usuario, self.Contrasenia)):
+            QMessageBox.warning(self, "Error", "Ya existe ese usuario")
             pass
         else:
             self.bd.anadir_usuario(self.Usuario, self.Contrasenia)
+            QMessageBox.information(self, "Registro", f"Se ha registrado correctamente")
         """Registra el usuario en la base de datos"""
 
     def iniciarsesion(self):

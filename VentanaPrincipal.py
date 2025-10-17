@@ -119,7 +119,9 @@ class VentanaPrincipal(QMainWindow):
 
     def cambiarEstado(self):
         fila = self.tabla.currentRow()
-        self.bd.actualizar_estado(self.tabla.item(fila, 0).text())
+        self.a = self.tabla.item(fila, 3).text
+        print(self.a)
+        """self.bd.actualizar_estado(self.tabla.item(fila, 0).text(), )"""
         self.poner_datos_en_tabla()
 
     def poner_datos_en_tabla(self):
@@ -153,8 +155,6 @@ class VentanaPrincipal(QMainWindow):
 
     def abrirGTR(self):
         self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
-
-
 
     def exportarPDFge(self):
         graficos.ExportarAPDF(graficos.GraficoEstadoDeIncidencias)
