@@ -1,10 +1,8 @@
-fastapi
-uvicorn[standard]
+PyQt5
+matplotlib
+sqlite3-binary
 scikit-learn
+joblib
+flask
 pandas
 numpy
-joblib
-python-multipart
-pydantic
-matplotlib
-requests

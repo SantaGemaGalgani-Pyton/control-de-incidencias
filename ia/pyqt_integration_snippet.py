@@ -1,42 +1,52 @@
-"""
-Ejemplo de integración en PyQt (función que se llama cuando se cambia la descripción
-o se quiere predecir al crear/incidencia seleccionar).
-Requiere `requests`.
-"""
-import requests
-from PyQt5.QtWidgets import QMessageBox
+# ia/pyqt_integration_snippet.py
+from pathlib import Path
+import joblib
+from typing import Optional
 
-API_URL = "http://127.0.0.1:8001/predict"
+MODEL_PATH = Path(__file__).resolve().parent / "models" / "model.joblib"
 
-def predecir_incidencia_y_mostrar(texto, parent_widget=None):
-    """
-    texto: str con título + descripción.
-    parent_widget: QWidget (opcional) para mostrar mensajes.
-    """
-    if not texto or texto.strip() == "":
+def load_pipeline():
+    if not MODEL_PATH.exists():
         return None
-    try:
-        resp = requests.post(API_URL, json={"texto": texto}, timeout=3.0)
-        if resp.status_code == 200:
-            data = resp.json()
-            prioridad = data.get('prioridad')
-            categoria = data.get('categoria')
-            # ejemplo: actualizar campos de la GUI
-            # self.lineEdit_prioridad.setText(str(prioridad))
-            # self.combo_categoria.setCurrentText(categoria)
-            # Muestro popup breve si hay parent_widget
-            if parent_widget:
-                QMessageBox.information(parent_widget, "Predicción IA", f"Prioridad: {prioridad}\nCategoría: {categoria}")
-            return data
+    return joblib.load(MODEL_PATH)
+
+_pipeline = None
+
+def predict_level_from_text(text: str) -> Optional[str]:
+    """
+    Devuelve la predicción del nivel (ej. 'Bajo', 'Medio', 'Alto')
+    o None si no hay modelo.
+    """
+    global _pipeline
+    if _pipeline is None:
+        _pipeline = load_pipeline()
+    if _pipeline is None:
+        return None
+    return _pipeline.predict([text])[0]
+
+# Ejemplo de uso dentro de PyQt (pseudocódigo / guía):
+pyqt_integration_example = """
+# En tu formulario de registro (ejemplo simplificado):
+from PyQt5.QtWidgets import QPushButton, QLineEdit, QComboBox
+from ia.pyqt_integration_snippet import predict_level_from_text
+
+# supongamos que tienes:
+# self.descripcion_textedit -> QLineEdit o QTextEdit
+# self.nivel_combobox -> QComboBox con opciones ('Bajo', 'Medio', 'Alto')
+# self.auto_predict_btn -> QPushButton
+
+def on_auto_predict_clicked(self):
+    texto = self.descripcion_textedit.toPlainText() if hasattr(self.descripcion_textedit, 'toPlainText') else self.descripcion_textedit.text()
+    pred = predict_level_from_text(texto)
+    if pred:
+        # intentar seleccionar el índice correspondiente en combobox
+        idx = self.nivel_combobox.findText(pred)
+        if idx != -1:
+            self.nivel_combobox.setCurrentIndex(idx)
         else:
-            if parent_widget:
-                QMessageBox.warning(parent_widget, "Error IA", f"Error en API: {resp.status_code}")
-            return None
-    except Exception as e:
-        if parent_widget:
-            QMessageBox.warning(parent_widget, "Error IA", f"No se pudo conectar al servicio IA:\n{e}")
-        return None
-
-# Ejemplo de uso:
-# texto = titulo + ". " + descripcion
-# data = predecir_incidencia_y_mostrar(texto, parent_widget=self)
+            # si no existe la opción, añadirla y seleccionarla
+            self.nivel_combobox.addItem(pred)
+            self.nivel_combobox.setCurrentText(pred)
+    else:
+        QMessageBox.information(self, "Modelo IA", "Modelo no disponible. Entrena primero (ia/train_model.py).")
+"""
