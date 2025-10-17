@@ -157,16 +157,16 @@ class VentanaPrincipal(QMainWindow):
         self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
 
     def exportarPDFge(self):
-        graficos.ExportarAPDF(graficos.GraficoEstadoDeIncidencias)
+        graficos.ExportarAPDF(graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado(), False))
 
     def exportarCSVge(self):
-        graficos.ExportarACSV(graficos.GraficoEstadoDeIncidencias)
+        graficos.ExportarACSV(graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado(), False))
 
     def exportarPDFgn(self):
-        graficos.ExportarAPDF(graficos.GraficoNivelDeIncidencias)
+        graficos.ExportarAPDF(graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad(), False))
 
     def exportarCSVgn(self):
-        graficos.ExportarACSV(graficos.GraficoNivelDeIncidencias)
+        graficos.ExportarACSV(graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad(), False))
 
     def filtrar_tabla(self, criterio):
         if criterio == "Todos":
