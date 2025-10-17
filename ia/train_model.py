@@ -1,189 +1,90 @@
-"""
-Entrenamiento de modelos para:
-- prioridad (Nivel)  -> clasificación (puede ser ordinal pero tratamos como clasificación)
-- categoria (si existe) -> clasificación multi-clase
-
-Uso:
- python ia/train_model.py --db path/to/bbddincidencias.db
- or
- python ia/train_model.py --csv path/to/labeled.csv
-
-El script guarda:
- - ia/tfidf_vectorizer.joblib
- - ia/model_priority.joblib
- - ia/model_category.joblib (si hay etiquetas de categoria)
-"""
-
-import argparse
+# ia/train_model.py
 import os
-import joblib
-import pandas as pd
-import numpy as np
-from sklearn.pipeline import Pipeline
+import sqlite3
+from pathlib import Path
+from typing import List, Tuple
+
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+import joblib
 
-# Ruta de salida
-OUT_DIR = "ia"
-os.makedirs(OUT_DIR, exist_ok=True)
+MODEL_DIR = Path(__file__).resolve().parent / "models"
+MODEL_DIR.mkdir(exist_ok=True, parents=True)
+MODEL_PATH = MODEL_DIR / "model.joblib"
+VECTORIZER_PATH = MODEL_DIR / "vectorizer.joblib"
 
-def load_from_sqlite(db_path):
-    import sqlite3
-    conn = sqlite3.connect(db_path)
-    # Intentamos seleccionar las columnas que puedan existir
-    query = """
-    SELECT ID, Titulo, Descripción_Detallada AS descripcion, Nivel AS prioridad, 
-           COALESCE(Categoria, Tipo, '') AS categoria
-    FROM incidencia
+DB_PATH = Path(__file__).resolve().parent.parent / "incidencias.db"
+
+def fetch_data_from_db(db_path=DB_PATH) -> List[Tuple[str, str]]:
     """
-    try:
-        df = pd.read_sql_query(query, conn)
-    except Exception as e:
-        # Fallback con nombres en ingles o distintos
-        query2 = "SELECT ID, Titulo, Descripcion_Detallada AS descripcion, Nivel AS prioridad FROM incidencia"
-        df = pd.read_sql_query(query2, conn)
-        # añade columna categoria vacía
-        if 'categoria' not in df.columns:
-            df['categoria'] = ''
+    Devuelve lista de tuplas (texto, nivel_descripcion)
+    """
+    if not db_path.exists():
+        return []
+
+    conn = sqlite3.connect(str(db_path))
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT i.Descripcion_Detallada, n.Descripcion_Detallada
+        FROM Incidencia i
+        LEFT JOIN Niveles n ON i.Nivel = n.Numero
+        WHERE i.Descripcion_Detallada IS NOT NULL AND n.Descripcion_Detallada IS NOT NULL
+    """)
+    rows = cur.fetchall()
     conn.close()
-    return df
+    return rows
 
-def load_from_csv(csv_path):
-    df = pd.read_csv(csv_path)
-    # Normalizar nombres de columnas
-    cols = {c.lower(): c for c in df.columns}
-    # Busca columnas típicas
-    mapping = {}
-    for key in ['descripcion','descripcion_detallada','descripcion_detalhada','description','text']:
-        if key in cols:
-            mapping[cols[key]] = 'descripcion'
-            break
-    for key in ['prioridad','nivel','level','priority']:
-        if key in cols:
-            mapping[cols[key]] = 'prioridad'
-            break
-    for key in ['categoria','category','type','tipo']:
-        if key in cols:
-            mapping[cols[key]] = 'categoria'
-            break
-    df = df.rename(columns=mapping)
-    if 'categoria' not in df.columns:
-        df['categoria'] = ''
-    return df
+def fallback_sample():
+    # Pequeño conjunto de ejemplo si la BBDD está vacía
+    return [
+        ("La impresora no funciona, hace ruido y no sale papel", "Bajo"),
+        ("Caída total del servidor, clientes no acceden a la web", "Alto"),
+        ("Usuario no recuerda contraseña", "Bajo"),
+        ("Pérdida de datos tras fallo actual, necesidad de recuperación urgente", "Alto"),
+        ("Error intermitente en la aplicación, afecta a algunos usuarios", "Medio"),
+        ("Pantalla azul al arrancar el equipo", "Medio"),
+    ]
 
-def prepare_data(df):
-    # Concatenate titulo y descripcion
-    if 'Titulo' in df.columns:
-        df['texto'] = df['Titulo'].fillna('') + '. ' + df['descripcion'].fillna('')
+def prepare_dataset(rows):
+    texts = [r[0] for r in rows]
+    labels = [r[1] for r in rows]
+    return texts, labels
+
+def train_and_save(test_size=0.2, random_state=42):
+    rows = fetch_data_from_db()
+    if len(rows) < 10:
+        # usamos fallback ampliando repetidos para que haya suficientes ejemplos
+        rows = fallback_sample() * 5
+
+    texts, labels = prepare_dataset(rows)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        texts, labels, test_size=test_size, random_state=random_state, stratify=labels if len(set(labels))>1 else None
+    )
+
+    vect = TfidfVectorizer(ngram_range=(1,2), max_features=3000)
+    clf = LogisticRegression(max_iter=1000)
+
+    pipeline = make_pipeline(vect, clf)
+    pipeline.fit(X_train, y_train)
+
+    # guardar pipeline completo
+    joblib.dump(pipeline, MODEL_PATH)
+    print(f"Modelo guardado en: {MODEL_PATH}")
+
+    # también guardar vectorizer por si se quiere usar separadamente
+    # (se obtiene desde pipeline.named_steps['tfidfvectorizer'] si hiciera falta)
+    joblib.dump(vect, VECTORIZER_PATH)
+    print(f"Vectorizer guardado en: {VECTORIZER_PATH}")
+
+    # opcional: evaluamos rápidamente
+    score = pipeline.score(X_test, y_test) if len(X_test)>0 else None
+    if score is not None:
+        print(f"Accuracy en test: {score:.3f}")
     else:
-        df['texto'] = df['descripcion'].fillna('')
-
-    # Drop empty texts
-    df = df[df['texto'].str.strip() != '']
-    # Prioridad: si no existe, intentar derivar de 'prioridad' o dejar NaN
-    if 'prioridad' not in df.columns and 'prioridad' not in df.columns:
-        df['prioridad'] = df.get('Nivel', np.nan)
-    df['prioridad'] = df['prioridad'].replace('', np.nan)
-    return df
-
-def train_priority(X_train, y_train):
-    # Clasificador simple: LogisticRegression (multiclase), con TF-IDF pipeline
-    pipe = Pipeline([
-        ('tfidf', TfidfVectorizer(max_features=15000, ngram_range=(1,2), stop_words='spanish')),
-        ('clf', LogisticRegression(max_iter=200))
-    ])
-    pipe.fit(X_train, y_train)
-    return pipe
-
-def train_category(X_train, y_train):
-    # MultinomialNB suele ir bien para texto multi-clase
-    pipe = Pipeline([
-        ('tfidf', TfidfVectorizer(max_features=15000, ngram_range=(1,2), stop_words='spanish')),
-        ('clf', MultinomialNB())
-    ])
-    pipe.fit(X_train, y_train)
-    return pipe
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--db', help='ruta a la base de datos sqlite')
-    parser.add_argument('--csv', help='ruta a CSV con columnas descripcion, prioridad, categoria')
-    parser.add_argument('--test-size', type=float, default=0.2)
-    parser.add_argument('--force-synthetic', action='store_true', help='crear dataset sintético de prueba si no hay etiquetas')
-    args = parser.parse_args()
-
-    if args.db:
-        df = load_from_sqlite(args.db)
-    elif args.csv:
-        df = load_from_csv(args.csv)
-    else:
-        raise SystemExit("Pasa --db or --csv con datos.")
-
-    df = prepare_data(df)
-
-    # PRIORIDAD
-    if df['prioridad'].notna().sum() < 10:
-        if args.force_synthetic:
-            print("Pocas etiquetas de prioridad; generando etiquetas sintéticas (solo para demo).")
-            # asignar prioridades aleatorias 1..3
-            np.random.seed(42)
-            df['prioridad'] = np.random.choice([1,2,3], size=len(df))
-        else:
-            print("Pocas etiquetas de prioridad. Usa --force-synthetic para demo o provee más datos.")
-            # seguimos pero con advertencia
-            df['prioridad'] = df['prioridad'].fillna(1)
-
-    # CATEGORIA
-    has_category = False
-    if 'categoria' in df.columns and df['categoria'].astype(str).str.strip().sum() > 0:
-        df['categoria'] = df['categoria'].fillna('').astype(str)
-        if df['categoria'].str.strip().nunique() > 1:
-            has_category = True
-    else:
-        if args.force_synthetic:
-            print("Generando categorías sintéticas para demo.")
-            # categorías sintéticas
-            choices = ['red', 'hardware', 'software', 'usuario', 'red']
-            np.random.seed(0)
-            df['categoria'] = np.random.choice(choices, size=len(df))
-            has_category = True
-        else:
-            print("No se detectaron etiquetas de categoria. Para entrenar categoria pasa --force-synthetic o un CSV con columna 'categoria'.")
-
-    # Entrenamiento prioridad
-    X = df['texto'].values
-    y_prio = df['prioridad'].astype(str).values  # tratar como string para clasificación
-    X_train, X_test, y_train, y_test = train_test_split(X, y_prio, test_size=args.test_size, random_state=42, stratify=y_prio)
-
-    print("Entrenando modelo de prioridad...")
-    model_prio = train_priority(X_train, y_train)
-    preds = model_prio.predict(X_test)
-    print("Reporte prioridad:")
-    print(classification_report(y_test, preds))
-    acc = accuracy_score(y_test, preds)
-    print(f"Exactitud prioridad: {acc:.3f}")
-
-    # Guardar
-    joblib.dump(model_prio, os.path.join(OUT_DIR, "model_priority.joblib"))
-    print("Modelo de prioridad guardado en ia/model_priority.joblib")
-
-    # Entrenamiento categoria si procede
-    if has_category:
-        y_cat = df['categoria'].values
-        X_train_c, X_test_c, y_train_c, y_test_c = train_test_split(X, y_cat, test_size=args.test_size, random_state=42, stratify=y_cat)
-        print("Entrenando modelo de categoria...")
-        model_cat = train_category(X_train_c, y_train_c)
-        preds_cat = model_cat.predict(X_test_c)
-        print("Reporte categoria:")
-        print(classification_report(y_test_c, preds_cat))
-        joblib.dump(model_cat, os.path.join(OUT_DIR, "model_category.joblib"))
-        print("Modelo de categoria guardado en ia/model_category.joblib")
-    else:
-        print("No se entrenó modelo de categoría (falta etiqueta).")
+        print("No hay conjunto de test para evaluar (datos insuficientes).")
 
 if __name__ == "__main__":
-    main()
+    train_and_save()

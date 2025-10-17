@@ -1,55 +1,51 @@
-"""
-Evaluación rápida de modelos guardados.
-Uso:
- python ia/evaluate_model.py --db path/to/bbddincidencias.db
-"""
-import argparse
+# ia/evaluate_model.py
+import os
+import sqlite3
+from pathlib import Path
+from typing import List, Tuple
+
 import joblib
-import numpy as np
-import pandas as pd
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
 
-def load_data_from_db(db_path):
-    import sqlite3
-    conn = sqlite3.connect(db_path)
-    query = "SELECT Titulo, Descripción_Detallada AS descripcion, Nivel AS prioridad, COALESCE(Categoria, Tipo, '') AS categoria FROM incidencia"
-    try:
-        df = pd.read_sql_query(query, conn)
-    except Exception:
-        query2 = "SELECT Titulo, Descripcion_Detallada AS descripcion, Nivel AS prioridad FROM incidencia"
-        df = pd.read_sql_query(query2, conn)
-        df['categoria'] = ''
+DB_PATH = Path(__file__).resolve().parent.parent / "incidencias.db"
+MODEL_PATH = Path(__file__).resolve().parent / "models" / "model.joblib"
+
+def fetch_data_from_db(db_path=DB_PATH):
+    if not db_path.exists():
+        return []
+    conn = sqlite3.connect(str(db_path))
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT i.Descripcion_Detallada, n.Descripcion_Detallada
+        FROM Incidencia i
+        LEFT JOIN Niveles n ON i.Nivel = n.Numero
+        WHERE i.Descripcion_Detallada IS NOT NULL AND n.Descripcion_Detallada IS NOT NULL
+    """)
+    rows = cur.fetchall()
     conn.close()
-    df['texto'] = df['Titulo'].fillna('') + '. ' + df['descripcion'].fillna('')
-    return df
+    return rows
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--db', required=True)
-    args = parser.parse_args()
-
-    df = load_data_from_db(args.db)
-    texts = df['texto'].astype(str).values
-
-    # cargar modelos si existen
-    try:
-        model_prio = joblib.load("ia/model_priority.joblib")
-    except:
-        print("No se encontró ia/model_priority.joblib")
+def evaluate():
+    rows = fetch_data_from_db()
+    if not rows:
+        print("No hay datos en la BBDD para evaluar.")
         return
-    y_true_prio = df['prioridad'].astype(str).fillna('0').values
-    y_pred_prio = model_prio.predict(texts)
-    print("Prioridad - accuracy:", accuracy_score(y_true_prio, y_pred_prio))
-    print(classification_report(y_true_prio, y_pred_prio))
 
-    try:
-        model_cat = joblib.load("ia/model_category.joblib")
-        y_true_cat = df['categoria'].astype(str).fillna('').values
-        y_pred_cat = model_cat.predict(texts)
-        print("Categoria - accuracy:", accuracy_score(y_true_cat, y_pred_cat))
-        print(classification_report(y_true_cat, y_pred_cat))
-    except:
-        print("No se encontró modelo de categoria (ia/model_category.joblib).")
+    texts = [r[0] for r in rows]
+    labels = [r[1] for r in rows]
+
+    if not MODEL_PATH.exists():
+        print("No se encuentra el modelo. Entrena primero (ejecuta ia/train_model.py).")
+        return
+
+    pipeline = joblib.load(MODEL_PATH)
+    preds = pipeline.predict(texts)
+    acc = accuracy_score(labels, preds)
+    print(f"Accuracy: {acc:.3f}\n")
+    print("Classification report:")
+    print(classification_report(labels, preds))
+    print("Confusion matrix:")
+    print(confusion_matrix(labels, preds))
 
 if __name__ == "__main__":
-    main()
+    evaluate()
