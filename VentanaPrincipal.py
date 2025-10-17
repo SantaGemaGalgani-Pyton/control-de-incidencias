@@ -39,12 +39,8 @@ class VentanaPrincipal(QMainWindow):
         estado_accion = QAction("Nivel", self)
         estado_accion.triggered.connect(self.abrirGE)
 
-        tiempo_resolucion_accion = QAction("Tiempo de Resolución", self)
-        tiempo_resolucion_accion.triggered.connect(self.abrirGTR)
-
         grafico_menu.addAction(gravedad_accion)
         grafico_menu.addAction(estado_accion)
-        grafico_menu.addAction(tiempo_resolucion_accion)
 
         exportar_menu = menubar.addMenu("Exportar")
 
@@ -55,9 +51,6 @@ class VentanaPrincipal(QMainWindow):
 
         PDFGnivel_accion = QAction("Grafico Nivel", self)
         PDFGnivel_accion.triggered.connect(self.exportarPDFgn)
-
-        PDFGtiempo_accion = QAction("Grafico Tiempo Resolucion", self)
-        PDFGtiempo_accion.triggered.connect(self.exportarPDFgt)
 
         csv_menu = exportar_menu.addMenu("CSV")
 
@@ -71,7 +64,6 @@ class VentanaPrincipal(QMainWindow):
 
         pdf_menu.addAction(PDFGestado_accion)
         pdf_menu.addAction(PDFGnivel_accion)
-        pdf_menu.addAction(PDFGtiempo_accion)
 
         exportar_menu.addMenu(csv_menu)
 
@@ -127,7 +119,9 @@ class VentanaPrincipal(QMainWindow):
 
     def cambiarEstado(self):
         fila = self.tabla.currentRow()
-        self.bd.actualizar_estado(self.tabla.item(fila, 0).text())
+        self.a = self.tabla.item(fila, 3).text
+        print(self.a)
+        """self.bd.actualizar_estado(self.tabla.item(fila, 0).text(), )"""
         self.poner_datos_en_tabla()
 
     def poner_datos_en_tabla(self):
@@ -163,16 +157,16 @@ class VentanaPrincipal(QMainWindow):
         self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
 
     def exportarPDFge(self):
-        graficos.ExportarAPDF(graficos.GraficoEstadoDeIncidencias)
+        graficos.ExportarAPDF(graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado(), False))
 
     def exportarCSVge(self):
-        graficos.ExportarACSV(graficos.GraficoEstadoDeIncidencias)
+        graficos.ExportarACSV(graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado(), False))
 
     def exportarPDFgn(self):
-        graficos.ExportarAPDF(graficos.GraficoNivelDeIncidencias)
+        graficos.ExportarAPDF(graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad(), False))
 
     def exportarCSVgn(self):
-        graficos.ExportarACSV(graficos.GraficoNivelDeIncidencias)
+        graficos.ExportarACSV(graficos.GraficoNivelDeIncidencias(self.bd.incidencias_gravedad(), False))
 
     def filtrar_tabla(self, criterio):
         if criterio == "Todos":
