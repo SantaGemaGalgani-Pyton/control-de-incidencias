@@ -12,30 +12,11 @@ Este proyecto permite:
 - Conexion con una base de datos SQLite  
 - Interfaz gráfica creada con módulos de Python
 ---
-## Estructura del proyecto
+## Dependencias
 
-```text
-control-de-incidencias/
-├── ArrayUtils.py
-├── BorrarI.py
-├── CircularG.py
-├── Main.py
-├── RegistroIncidencias.py
-├── RegistroUsu.py
-├── VentanaPrincipal.py
-├── bbdd.py
-├── graficos.py
-├── incidencias.db
-├── .gitignore
-└── README.md
-```
-## Estructura del proyecto
-
-Dependencias:
 * PyQt5
 * MatPlotLib
 * SQLite (dentro de python)
 * Pathlib
 * Joblib
 * Flask
-* 
