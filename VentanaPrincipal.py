@@ -39,12 +39,8 @@ class VentanaPrincipal(QMainWindow):
         estado_accion = QAction("Nivel", self)
         estado_accion.triggered.connect(self.abrirGE)
 
-        tiempo_resolucion_accion = QAction("Tiempo de Resolución", self)
-        tiempo_resolucion_accion.triggered.connect(self.abrirGTR)
-
         grafico_menu.addAction(gravedad_accion)
         grafico_menu.addAction(estado_accion)
-        grafico_menu.addAction(tiempo_resolucion_accion)
 
         exportar_menu = menubar.addMenu("Exportar")
 
@@ -55,9 +51,6 @@ class VentanaPrincipal(QMainWindow):
 
         PDFGnivel_accion = QAction("Grafico Nivel", self)
         PDFGnivel_accion.triggered.connect(self.exportarPDFgn)
-
-        PDFGtiempo_accion = QAction("Grafico Tiempo Resolucion", self)
-        PDFGtiempo_accion.triggered.connect(self.exportarPDFgt)
 
         csv_menu = exportar_menu.addMenu("CSV")
 
@@ -71,7 +64,6 @@ class VentanaPrincipal(QMainWindow):
 
         pdf_menu.addAction(PDFGestado_accion)
         pdf_menu.addAction(PDFGnivel_accion)
-        pdf_menu.addAction(PDFGtiempo_accion)
 
         exportar_menu.addMenu(csv_menu)
 
@@ -161,6 +153,8 @@ class VentanaPrincipal(QMainWindow):
 
     def abrirGTR(self):
         self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
+
+
 
     def exportarPDFge(self):
         graficos.ExportarAPDF(graficos.GraficoEstadoDeIncidencias)
