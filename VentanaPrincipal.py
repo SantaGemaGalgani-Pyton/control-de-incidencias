@@ -67,9 +67,6 @@ class VentanaPrincipal(QMainWindow):
         CSVGnivel_accion = QAction("Grafico Nivel", self)
         CSVGnivel_accion.triggered.connect(self.exportarCSVgn)
 
-        CSVGtiempo_accion = QAction("Grafico Tiempo Resolucion", self)
-        CSVGtiempo_accion.triggered.connect(self.exportarCSVgt)
-
         exportar_menu.addMenu(pdf_menu)
 
         pdf_menu.addAction(PDFGestado_accion)
@@ -80,7 +77,26 @@ class VentanaPrincipal(QMainWindow):
 
         csv_menu.addAction(CSVGestado_accion)
         csv_menu.addAction(CSVGnivel_accion)
-        csv_menu.addAction(CSVGtiempo_accion)
+
+        filtros_menu = menubar.addMenu("Filtros")
+
+        filtrar_estado_accion = QAction("Filtrar por Estado", self)
+        filtrar_estado_accion.triggered.connect(lambda: self.filtrar_tabla("Estado"))
+
+        filtrar_nivel_accion = QAction("Filtrar por Nivel", self)
+        filtrar_nivel_accion.triggered.connect(lambda: self.filtrar_tabla("Nivel"))
+
+        filtrar_fecha_accion = QAction("Filtrar por Fecha", self)
+        filtrar_fecha_accion.triggered.connect(lambda: self.filtrar_tabla("Fecha creación"))
+
+        mostrar_todos_accion = QAction("Mostrar todos", self)
+        mostrar_todos_accion.triggered.connect(lambda: self.filtrar_tabla("Todos"))
+
+        filtros_menu.addAction(filtrar_estado_accion)
+        filtros_menu.addAction(filtrar_nivel_accion)
+        filtros_menu.addAction(filtrar_fecha_accion)
+        filtros_menu.addSeparator()
+        filtros_menu.addAction(mostrar_todos_accion)
 
         central_widget = QWidget()
         layout = QVBoxLayout()
@@ -146,12 +162,6 @@ class VentanaPrincipal(QMainWindow):
     def abrirGTR(self):
         self.registro = graficos.GraficoEstadoDeIncidencias(self.bd.incidencias_estado())
 
-    def abrirGTR(self):
-        #self.registro = graficos.()
-        self.registro.show()
-        self.close()
-    """Abre el grafico de tiempo de registro"""
-
     def exportarPDFge(self):
         graficos.ExportarAPDF(graficos.GraficoEstadoDeIncidencias)
 
@@ -164,11 +174,32 @@ class VentanaPrincipal(QMainWindow):
     def exportarCSVgn(self):
         graficos.ExportarACSV(graficos.GraficoNivelDeIncidencias)
 
-    def exportarPDFgt(self):
-        graficos.ExportarAPDF(graficos.GraficoTiempoDeIncidencias)
+    def filtrar_tabla(self, criterio):
+        if criterio == "Todos":
+            for fila in range(self.tabla.rowCount()):
+                self.tabla.setRowHidden(fila, False)
+            return
+    
+        valor, ok = QInputDialog.getText(self, "Filtrar", f"Ingrese {criterio}:")
+        if not ok or not valor:
+            return
 
-    def exportarCSVgt(self):
-        graficos.ExportarACSV(graficos.GraficoTiempoDeIncidencias)
+        if criterio == "Estado":
+            col = 4
+        elif criterio == "Nivel":
+            col = 1
+        elif criterio == "Fecha creación":
+            col = 2
+        else:
+            return
+
+        for fila in range(self.tabla.rowCount()):
+            item = self.tabla.item(fila, col)
+            if item and item.text() == valor:
+                self.tabla.setRowHidden(fila, False)
+            else:
+                self.tabla.setRowHidden(fila, True)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
